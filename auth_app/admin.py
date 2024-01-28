@@ -4,15 +4,15 @@ from .models import User
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    # add_fieldsets = (
-    #     (
-    #         None,
-    #         {
-    #             "classes": ("wide",),
-    #             "fields": ("username", "password1", "password2","email"),
-    #         },
-    #     ),
-    # )
-    pass
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("username", "password1", "password2","first_name","last_name"),
+            },
+        ),
+    )
+    
 
 

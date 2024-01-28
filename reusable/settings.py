@@ -41,11 +41,16 @@ INSTALLED_APPS = [
     'rest_framework',
     'djoser',
     'rest_framework_simplejwt',
+    'debug_toolbar',
 
     'auth_app',
+    'appointment',
 
     
 ]
+INTERNAL_IPS = [
+     "127.0.0.1",
+ ]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -63,6 +68,7 @@ SIMPLE_JWT = {
 
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -145,3 +151,9 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'auth_app.User'
+
+DJOSER = {
+    'SERIALIZERS': {
+        'user_create': 'auth_app.serializers.UserCreateSerializer'
+    }
+}
