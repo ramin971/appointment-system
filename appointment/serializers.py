@@ -12,6 +12,7 @@ class DoctorSerializer(serializers.ModelSerializer):
         return f'{obj.user.first_name} {obj.user.last_name}'
         
     def validate(self, attrs):
+        # if self.context.get('user') is not None:
         attrs['user'] = self.context.get('user')
         return super().validate(attrs)
     
