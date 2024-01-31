@@ -7,8 +7,8 @@ from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 
 from .permissions import IsOwnerOrReadOnly
-from .models import Doctor,Patient
-from .serializers import DoctorSerializer,CreateDoctorSerializer
+from .models import Doctor,Patient,MeetingTime
+from .serializers import DoctorSerializer,CreateDoctorSerializer,PatientSerializer,MeetingTimeSerializer,BulkCreateMeetingTimeSerializer
 
 class DoctorViewSet(ModelViewSet):
     queryset = Doctor.objects.all()
@@ -40,4 +40,29 @@ class DoctorViewSet(ModelViewSet):
             return Response(serializer.data,status=status.HTTP_202_ACCEPTED)
             
     
+class PatientViewSet(ModelViewSet):
+    queryset = Patient.objects.all()
+    serializer_class = PatientSerializer
 
+class MeetingTimeViewSet(ModelViewSet):
+    queryset = MeetingTime.objects.all()
+    serializer_class = MeetingTimeSerializer
+
+    def create(self, request, *args, **kwargs):
+        many = isinstance(request.data, list)
+        serializer = self.get_serializer(data=request.data,many=many)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    
+    # def create(self, request, *args, **kwargs):
+    #     serializer = self.get_serializer(data=request.data, many=True)
+    #     serializer.is_valid(raise_exception=True)
+    #     self.perform_create(serializer)
+    #     print('#########',serializer.data)
+    #     headers = self.get_success_headers(serializer.data)
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    
+    
+    

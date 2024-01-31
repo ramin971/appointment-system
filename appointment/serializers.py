@@ -1,6 +1,7 @@
-from rest_framework import serializers
-from .models import Doctor,Patient
-
+from rest_framework import serializers,status
+from .models import Doctor,Patient,MeetingTime
+from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
 
 class DoctorSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField(read_only=True)
@@ -24,3 +25,25 @@ class CreateDoctorSerializer(serializers.ModelSerializer):
         model = Doctor
         fields = ['user','fee']
 
+
+class PatientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Patient
+        fields = ['id','fullname','national_code','phone','doctor','date','time','created']
+        read_only_fields = ['id','created']
+
+
+
+
+class BulkCreateMeetingTimeSerializer(serializers.ListSerializer):
+    def create(self, validated_data):
+        times = [MeetingTime(**item) for item in validated_data]
+        return MeetingTime.objects.bulk_create(times)
+        
+
+class MeetingTimeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MeetingTime
+        fields = ['id','time']
+        read_only_fields = ['id']
+        list_serializer_class = BulkCreateMeetingTimeSerializer
