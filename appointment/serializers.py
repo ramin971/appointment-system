@@ -27,11 +27,13 @@ class CreateDoctorSerializer(serializers.ModelSerializer):
 
 
 class PatientSerializer(serializers.ModelSerializer):
+    meeting_time = serializers.StringRelatedField(source='time',read_only=True,)
     class Meta:
         model = Patient
-        fields = ['id','fullname','national_code','phone','doctor','date','time','created']
+        fields = ['id','fullname','national_code','phone','doctor','date','time','meeting_time','created']
         read_only_fields = ['id','created']
-
+        extra_kwargs = {'time':{'write_only':True}}
+        
 
 
 
@@ -42,8 +44,13 @@ class BulkCreateMeetingTimeSerializer(serializers.ListSerializer):
         
 
 class MeetingTimeSerializer(serializers.ModelSerializer):
+    doctor = serializers.StringRelatedField()
     class Meta:
         model = MeetingTime
-        fields = ['id','time']
+        fields = ['id','time','doctor']
         read_only_fields = ['id']
         list_serializer_class = BulkCreateMeetingTimeSerializer
+
+    def validate(self, attrs):
+        attrs['doctor'] = self.context['doctor']
+        return super().validate(attrs)

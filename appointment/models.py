@@ -12,6 +12,7 @@ class Doctor(models.Model):
 
 class MeetingTime(models.Model):
     time = models.CharField(max_length=20,unique=True)
+    doctor = models.ForeignKey(Doctor,on_delete=models.CASCADE)
 
     def __str__(self) -> str:
         return self.time
@@ -30,4 +31,8 @@ class Patient(models.Model):
     def __str__(self) -> str:
         return self.fullname
     
+    class Meta:
+        constraints=[
+            models.UniqueConstraint(fields=['date','time'],name='unique_meet_time')
+        ]
 

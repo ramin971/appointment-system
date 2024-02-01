@@ -23,7 +23,7 @@ class DoctorViewSet(ModelViewSet):
     def get_serializer_context(self):
         return {'user':self.request.user}
     
-    @action(detail=False,methods=['get','put'],permission_classes=[IsAuthenticated])
+    @action(detail=False,methods=['get','put','delete'],permission_classes=[IsAuthenticated])
     def me(self,request):
         print(request.user)
         doctor = get_object_or_404(Doctor,user=request.user)
@@ -38,15 +38,23 @@ class DoctorViewSet(ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data,status=status.HTTP_202_ACCEPTED)
+        elif request.method == 'DELETE':
+            doctor.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
             
     
 class PatientViewSet(ModelViewSet):
-    queryset = Patient.objects.all()
+    queryset = Patient.objects.select_related('time').all()
     serializer_class = PatientSerializer
 
 class MeetingTimeViewSet(ModelViewSet):
-    queryset = MeetingTime.objects.all()
+    # queryset = MeetingTime.objects.all()
+    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsDoctor]
     serializer_class = MeetingTimeSerializer
+
+    def get_queryset(self):
+        return MeetingTime.objects.filter(doctor=self.request.user.id)
 
     def create(self, request, *args, **kwargs):
         many = isinstance(request.data, list)
@@ -56,13 +64,9 @@ class MeetingTimeViewSet(ModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
     
-    # def create(self, request, *args, **kwargs):
-    #     serializer = self.get_serializer(data=request.data, many=True)
-    #     serializer.is_valid(raise_exception=True)
-    #     self.perform_create(serializer)
-    #     print('#########',serializer.data)
-    #     headers = self.get_success_headers(serializer.data)
-    #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    def get_serializer_context(self):
+        doctor=get_object_or_404(Doctor,user=self.request.user)
+        return {'doctor':doctor}
     
     
     
