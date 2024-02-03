@@ -7,7 +7,7 @@ class Doctor(models.Model):
     fee = models.PositiveIntegerField()
 
     def __str__(self) -> str:
-        return self.user.username
+        return f'{self.user.first_name} {self.user.last_name}' 
 
 
 class MeetingTime(models.Model):

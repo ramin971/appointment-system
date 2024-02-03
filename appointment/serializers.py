@@ -27,7 +27,7 @@ class CreateDoctorSerializer(serializers.ModelSerializer):
 
 
 class PatientSerializer(serializers.ModelSerializer):
-    meeting_time = serializers.StringRelatedField(source='time',read_only=True,)
+    meeting_time = serializers.StringRelatedField(source='time',read_only=True)
     class Meta:
         model = Patient
         fields = ['id','fullname','national_code','phone','doctor','date','time','meeting_time','created']

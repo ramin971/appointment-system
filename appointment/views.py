@@ -1,17 +1,17 @@
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.exceptions import PermissionDenied 
+from rest_framework.exceptions import PermissionDenied ,NotAcceptable
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.decorators import action 
 from django.shortcuts import get_object_or_404
 
-from .permissions import IsOwnerOrReadOnly
+from .permissions import IsOwnerOrReadOnly,IsDoctor
 from .models import Doctor,Patient,MeetingTime
 from .serializers import DoctorSerializer,CreateDoctorSerializer,PatientSerializer,MeetingTimeSerializer,BulkCreateMeetingTimeSerializer
 
 class DoctorViewSet(ModelViewSet):
-    queryset = Doctor.objects.all()
+    queryset = Doctor.objects.select_related('user').all()
     # serializer_class = DoctorSerializer
     permission_classes = [IsOwnerOrReadOnly]
 
@@ -23,10 +23,9 @@ class DoctorViewSet(ModelViewSet):
     def get_serializer_context(self):
         return {'user':self.request.user}
     
-    @action(detail=False,methods=['get','put','delete'],permission_classes=[IsAuthenticated])
+    @action(detail=False,methods=['get','put','delete'],permission_classes=[IsAuthenticated])# permission_classes = [IsDoctor] # if this ==> get_ser_cont:doctor=d.ob.filter
     def me(self,request):
-        print(request.user)
-        doctor = get_object_or_404(Doctor,user=request.user)
+        doctor = get_object_or_404(Doctor,user=request.user) # converte to get
         if request.method == 'GET':
             print('@@@@@@GET')
             serializer = DoctorSerializer(doctor)
@@ -44,17 +43,19 @@ class DoctorViewSet(ModelViewSet):
             
     
 class PatientViewSet(ModelViewSet):
-    queryset = Patient.objects.select_related('time').all()
+    queryset = Patient.objects.select_related('time','doctor').all()
+    # queryset = Patient.objects.all()
+    permission_classes = [AllowAny]
     serializer_class = PatientSerializer
 
 class MeetingTimeViewSet(ModelViewSet):
     # queryset = MeetingTime.objects.all()
-    permission_classes = [IsAuthenticated]
-    # permission_classes = [IsDoctor]
+    # permission_classes = [IsAuthenticated]
+    # permission_classes = [IsDoctor] # if this ==> get_ser_cont:doctor=d.ob.filter
     serializer_class = MeetingTimeSerializer
 
     def get_queryset(self):
-        return MeetingTime.objects.filter(doctor=self.request.user.id)
+        return MeetingTime.objects.select_related('doctor__user').filter(doctor=self.request.user.id)
 
     def create(self, request, *args, **kwargs):
         many = isinstance(request.data, list)
@@ -66,7 +67,9 @@ class MeetingTimeViewSet(ModelViewSet):
     
     def get_serializer_context(self):
         doctor=get_object_or_404(Doctor,user=self.request.user)
+        # doctor = Doctor.objects.filter(user=self.request.user)
         return {'doctor':doctor}
-    
+
+        
     
     
