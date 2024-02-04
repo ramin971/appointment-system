@@ -5,7 +5,7 @@ from rest_framework.exceptions import PermissionDenied ,NotAcceptable
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.decorators import action
+from rest_framework.decorators import action,api_view
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from django.shortcuts import get_object_or_404
@@ -87,4 +87,8 @@ class MeetingTimeViewSet(ModelViewSet):
 
         
     
-    
+@api_view(['GET'])
+def relatedtime(request,pk):
+    queryset = MeetingTime.objects.filter(doctor=pk)
+    serializer = MeetingTimeSerializer(queryset,many=True)
+    return Response(serializer.data,status=status.HTTP_200_OK)

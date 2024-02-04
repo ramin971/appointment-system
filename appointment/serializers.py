@@ -56,3 +56,4 @@ class MeetingTimeSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         attrs['doctor'] = self.context['doctor']
         return super().validate(attrs)
+    
