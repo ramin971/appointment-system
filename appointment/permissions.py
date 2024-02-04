@@ -15,7 +15,10 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
                 
             )
 
-class IsDoctor(permissions.BasePermission):
+class AuthenticateOrWriteOnly(permissions.BasePermission):
     def has_permission(self, request, view):
-
-        return bool(request.user and request.user.is_authenticated and Doctor.objects.filter(user=request.user).exists())
+        if request.method in permissions.SAFE_METHODS:
+            return bool(request.user and request.user.is_authenticated)
+        return bool(True)
+    
+    #  and (Doctor.objects.filter(user=request.user).exists())

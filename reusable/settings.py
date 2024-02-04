@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'djoser',
     'rest_framework_simplejwt',
+    'django_filters',
     'debug_toolbar',
 
     'auth_app',

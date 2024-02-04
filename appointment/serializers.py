@@ -4,13 +4,14 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 class DoctorSerializer(serializers.ModelSerializer):
-    full_name = serializers.SerializerMethodField(read_only=True)
+    # full_name = serializers.SerializerMethodField(read_only=True)
+    full_name = serializers.CharField(source='__str__')
     class Meta:
         model = Doctor
         fields = ['full_name','fee']
 
-    def get_full_name(self,obj):
-        return f'{obj.user.first_name} {obj.user.last_name}'
+    # def get_full_name(self,obj):
+    #     return f'{obj.user.first_name} {obj.user.last_name}'
         
     def validate(self, attrs):
         # if self.context.get('user') is not None:
@@ -28,11 +29,12 @@ class CreateDoctorSerializer(serializers.ModelSerializer):
 
 class PatientSerializer(serializers.ModelSerializer):
     meeting_time = serializers.StringRelatedField(source='time',read_only=True)
+    doctor_name = serializers.StringRelatedField(source='doctor',read_only=True)
     class Meta:
         model = Patient
-        fields = ['id','fullname','national_code','phone','doctor','date','time','meeting_time','created']
+        fields = ['id','fullname','national_code','phone','doctor_name','doctor','date','time','meeting_time','created']
         read_only_fields = ['id','created']
-        extra_kwargs = {'time':{'write_only':True}}
+        extra_kwargs = {'time':{'write_only':True},'doctor':{'write_only':True}}
         
 
 
