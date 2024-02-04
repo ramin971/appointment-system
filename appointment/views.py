@@ -1,9 +1,10 @@
-from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.response import Response
 from rest_framework.generics import ListCreateAPIView
 from rest_framework.exceptions import PermissionDenied ,NotAcceptable
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated,AllowAny
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.decorators import action
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
@@ -48,14 +49,17 @@ class DoctorViewSet(ModelViewSet):
 class PatientViewSet(ListCreateAPIView):
     # queryset = Patient.objects.select_related('time','doctor__user').filter('doctor'=self.request.user)
     filter_backends = [DjangoFilterBackend,SearchFilter]
-    filterset_fields = ['doctor', 'date']
+    # filterset_fields = ['doctor', 'date']
+    filterset_fields = {
+      'date':[ 'gte', 'lte'],
+      'doctor':['exact']}
     search_fields = ['fullname','national_code']
-    # queryset = Patient.objects.all()
+    pagination_class = PageNumberPagination
     permission_classes = [AuthenticateOrWriteOnly]
     serializer_class = PatientSerializer
     def get_queryset(self):
         if self.request.user.is_superuser:
-            print('###################',self.request.user.is_superuser,self.request.user.is_staff)
+            # print('###################',self.request.user.is_superuser,self.request.user.is_staff)
             return Patient.objects.select_related('time','doctor__user').all()
         return Patient.objects.select_related('time','doctor__user').filter(doctor=self.request.user.id)
 

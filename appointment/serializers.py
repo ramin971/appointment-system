@@ -34,7 +34,7 @@ class PatientSerializer(serializers.ModelSerializer):
         model = Patient
         fields = ['id','fullname','national_code','phone','doctor_name','doctor','date','time','meeting_time','created']
         read_only_fields = ['id','created']
-        extra_kwargs = {'time':{'write_only':True},'doctor':{'write_only':True}}
+        extra_kwargs = {'time':{'write_only':True,'allow_null':False},'doctor':{'write_only':True}}
         
 
 

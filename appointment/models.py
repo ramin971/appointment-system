@@ -24,7 +24,7 @@ class Patient(models.Model):
         digit',code='invalid_national_code')],max_length=10)
     phone = models.CharField(validators=[RegexValidator(regex='(\+98|0)?(9\d{9})')],max_length=13)
     date = models.DateField()
-    time = models.ForeignKey(MeetingTime,on_delete=models.SET_NULL,null=True)
+    time = models.ForeignKey(MeetingTime,on_delete=models.SET_NULL,null=True,blank=False)
     created = models.DateTimeField(auto_now_add=True)
     doctor = models.ForeignKey(Doctor,on_delete=models.PROTECT,related_name='patients')
 
