@@ -1,7 +1,9 @@
+import jdatetime
 from rest_framework import serializers,status
 from .models import Doctor,Patient,MeetingTime
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
+
 
 class DoctorSerializer(serializers.ModelSerializer):
     # full_name = serializers.SerializerMethodField(read_only=True)
@@ -30,13 +32,17 @@ class CreateDoctorSerializer(serializers.ModelSerializer):
 class PatientSerializer(serializers.ModelSerializer):
     meeting_time = serializers.StringRelatedField(source='time',read_only=True)
     doctor_name = serializers.StringRelatedField(source='doctor',read_only=True)
+    meeting_date = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = Patient
-        fields = ['id','fullname','national_code','phone','doctor_name','doctor','date','time','meeting_time','created']
+        fields = ['id','fullname','national_code','phone','doctor_name','doctor','date','meeting_date','time','meeting_time','created']
         read_only_fields = ['id','created']
-        extra_kwargs = {'time':{'write_only':True,'allow_null':False},'doctor':{'write_only':True}}
+        extra_kwargs = {'time':{'write_only':True,'allow_null':False},'doctor':{'write_only':True},'date':{'write_only':True}}
         
-
+    def get_meeting_date(self,obj):
+        date = obj.date
+        date2j = jdatetime.date.fromgregorian(year=date.year,month=date.month,day=date.day)
+        return str(date2j)
 
 
 class BulkCreateMeetingTimeSerializer(serializers.ListSerializer):
