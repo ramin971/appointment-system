@@ -8,11 +8,12 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.decorators import action,api_view
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
-from django.shortcuts import get_object_or_404
-
+from django.shortcuts import get_object_or_404,redirect
+from django.urls import reverse
 from .permissions import IsOwnerOrReadOnly,AuthenticateOrWriteOnly
 from .models import Doctor,Patient,MeetingTime
 from .serializers import DoctorSerializer,CreateDoctorSerializer,PatientSerializer,MeetingTimeSerializer,BulkCreateMeetingTimeSerializer
+from payments.views import go_to_gateway_view
 
 class DoctorViewSet(ModelViewSet):
     queryset = Doctor.objects.select_related('user').all()
@@ -62,6 +63,14 @@ class PatientViewSet(ListCreateAPIView):
             # print('###################',self.request.user.is_superuser,self.request.user.is_staff)
             return Patient.objects.select_related('time','doctor__user').all()
         return Patient.objects.select_related('time','doctor__user').filter(doctor=self.request.user.id)
+    
+    def post(self, request, *args, **kwargs):
+        print('@@@@@@post ')
+        doctor_fee = Doctor.objects.get(pk=request.data['doctor']).fee
+        patient_phone = request.data['phone']
+        super().post(request, *args, **kwargs)
+        return go_to_gateway_view(request,fee=doctor_fee,phone=patient_phone)
+        # return super().post(request, *args, **kwargs)
 
 class MeetingTimeViewSet(ModelViewSet):
     # queryset = MeetingTime.objects.all()
