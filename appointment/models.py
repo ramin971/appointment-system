@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.validators import RegexValidator,MaxLengthValidator,MinLengthValidator
+from django.core.validators import RegexValidator
 from django.conf import settings
 
 class Doctor(models.Model):

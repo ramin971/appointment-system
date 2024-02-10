@@ -1,12 +1,10 @@
-from django.urls import reverse
 from azbankgateways import bankfactories, models as bank_models, default_settings as settings
 from azbankgateways.exceptions import AZBankGatewaysException
 from django.http import HttpResponse,Http404
 from appointment.models import Patient
-from appointment.serializers import PatientSerializer
-from rest_framework import status
-from rest_framework.response import Response
 from django.shortcuts import get_object_or_404,redirect
+from django.urls import reverse
+
 # from appointment.views import me
 def go_to_gateway_view(request):
     print('@@@@@@gateway ')
@@ -49,8 +47,8 @@ def callback_gateway_view(request):
     patient_id = request.session.get('pat_id')
     # patient = Patient.objects.get(pk=patient_id)
     patient = get_object_or_404(Patient,pk=patient_id)
-    print('$$$$$$$$$$tc',tracking_code)
-    print('type tc:$',type(tracking_code))
+    # print('$$$$$$$$$$tc',tracking_code)
+    # print('type tc:$',type(tracking_code))
 
     if not tracking_code:
         patient.delete()
