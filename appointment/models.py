@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator,MaxLengthValidator,MinLengthValidator
 from django.conf import settings
 
 class Doctor(models.Model):
@@ -27,6 +27,10 @@ class Patient(models.Model):
     time = models.ForeignKey(MeetingTime,on_delete=models.SET_NULL,null=True,blank=False)
     created = models.DateTimeField(auto_now_add=True)
     doctor = models.ForeignKey(Doctor,on_delete=models.PROTECT,related_name='patients')
+    tracking_code = models.CharField(max_length=16,validators=[RegexValidator(regex='^\d{16}$'
+                                                                              ,message='must be 16 digit'
+                                                                              ,code='invalid_tc_code')]
+                                                                              ,null=True,unique=True)
 
     def __str__(self) -> str:
         return self.fullname

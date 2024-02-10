@@ -35,8 +35,8 @@ class PatientSerializer(serializers.ModelSerializer):
     meeting_date = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = Patient
-        fields = ['id','fullname','national_code','phone','doctor_name','doctor','date','meeting_date','time','meeting_time','created']
-        read_only_fields = ['id','created']
+        fields = ['id','fullname','national_code','phone','doctor_name','doctor','date','meeting_date','time','meeting_time','tracking_code','created']
+        read_only_fields = ['id','created','tracking_code']
         extra_kwargs = {'time':{'write_only':True,'allow_null':False},'doctor':{'write_only':True},'date':{'write_only':True}}
         
     def get_meeting_date(self,obj):

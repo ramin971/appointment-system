@@ -9,5 +9,6 @@ router.register(r'time',views.MeetingTimeViewSet,basename='meeting_time')
 urlpatterns = [
     path('',include(router.urls)),
     path('patient/',views.PatientViewSet.as_view()),
-    path('related-time/<int:pk>',views.relatedtime)
+    path('related-time/<int:pk>',views.relatedtime),
+    path('receipt/<str:tc>',views.receipt,name='receipt')
 ]

@@ -2,17 +2,27 @@ from django.urls import reverse
 from azbankgateways import bankfactories, models as bank_models, default_settings as settings
 from azbankgateways.exceptions import AZBankGatewaysException
 from django.http import HttpResponse,Http404
-
-def go_to_gateway_view(request,**kwargs):
+from appointment.models import Patient
+from appointment.serializers import PatientSerializer
+from rest_framework import status
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404,redirect
+# from appointment.views import me
+def go_to_gateway_view(request):
     print('@@@@@@gateway ')
-    print('@@@@@@kws',kwargs)
-    # print('@@@@@@',request.GET.get('fee'))
-
+    # print('@@@@@@kws',kwargs)
+    # kwargs.get('serializer').save()
     # print('####serializer',a)
     # خواندن مبلغ از هر جایی که مد نظر است
-    amount = kwargs.get('fee',50000)
+    #old
+    # amount = int(kwargs.get('fee',50000))
     # تنظیم شماره موبایل کاربر از هر جایی که مد نظر است
-    user_mobile_number = kwargs.get('patient_phone',+989123456789)  # اختیاری
+    #old
+    # user_mobile_number = kwargs.get('patient_phone',+989123456789) # اختیاری
+
+    amount = request.session.get('fee')
+    user_mobile_number = request.session.get('phone')
+    print('$$$',amount,user_mobile_number)
 
     factory = bankfactories.BankFactory()
     try:
@@ -36,23 +46,44 @@ def go_to_gateway_view(request,**kwargs):
 
 def callback_gateway_view(request):
     tracking_code = request.GET.get(settings.TRACKING_CODE_QUERY_PARAM, None)
+    patient_id = request.session.get('pat_id')
+    # patient = Patient.objects.get(pk=patient_id)
+    patient = get_object_or_404(Patient,pk=patient_id)
+    print('$$$$$$$$$$tc',tracking_code)
+    print('type tc:$',type(tracking_code))
+
     if not tracking_code:
+        patient.delete()
         # logging.debug("این لینک معتبر نیست.")
         raise Http404
 
     try:
         bank_record = bank_models.Bank.objects.get(tracking_code=tracking_code)
     except bank_models.Bank.DoesNotExist:
+        patient.delete()
         # logging.debug("این لینک معتبر نیست.")
         raise Http404
 
     # در این قسمت باید از طریق داده هایی که در بانک رکورد وجود دارد، رکورد متناظر یا هر اقدام مقتضی دیگر را انجام دهیم
     if bank_record.is_success:
-        return bank_record
+        # print('session_pat:######',request.session.get('pat_id'))
+        # serializer = PatientSerializer(patient,tc=tracking_code)
+        # serializer.is_valid(raise_exception=True)
+        # tc must be unique
+        # serializer.save()
+        # print('*****',bank_record)
         # پرداخت با موفقیت انجام پذیرفته است و بانک تایید کرده است.
         # می توانید کاربر را به صفحه نتیجه هدایت کنید یا نتیجه را نمایش دهید.
-        return HttpResponse("پرداخت با موفقیت انجام شد.")
-
+        # result = serializer.data
+        # result['tracking_code'] = tracking_code
+        # result['result'] = "پرداخت با موفقیت انجام شد." 
+        # return Response(serializer.data,status=status.HTTP_200_OK)
+        # return me(request,tc=tracking_code)
+        patient.tracking_code = tracking_code
+        patient.save()
+        return redirect(reverse('receipt',kwargs={'tc':tracking_code}))
+    
+    patient.delete()
     # پرداخت موفق نبوده است. اگر پول کم شده است ظرف مدت ۴۸ ساعت پول به حساب شما بازخواهد گشت.
     return HttpResponse("پرداخت با شکست مواجه شده است. اگر پول کم شده است ظرف مدت ۴۸ ساعت پول به حساب شما بازخواهد گشت.")
 
