@@ -51,14 +51,14 @@ def callback_gateway_view(request):
     # print('type tc:$',type(tracking_code))
 
     if not tracking_code:
-        patient.delete()
+        #patient.delete()
         # logging.debug("این لینک معتبر نیست.")
         raise Http404
 
     try:
         bank_record = bank_models.Bank.objects.get(tracking_code=tracking_code)
     except bank_models.Bank.DoesNotExist:
-        patient.delete()
+        #patient.delete()
         # logging.debug("این لینک معتبر نیست.")
         raise Http404
 
@@ -79,9 +79,13 @@ def callback_gateway_view(request):
         # return me(request,tc=tracking_code)
         patient.tracking_code = tracking_code
         patient.save()
+        
+        del request.session['phone']
+        del request.session['fee']
+        del request.session['pat_id']
         return redirect(reverse('receipt',kwargs={'tc':tracking_code}))
     
-    patient.delete()
+    #patient.delete()
     # پرداخت موفق نبوده است. اگر پول کم شده است ظرف مدت ۴۸ ساعت پول به حساب شما بازخواهد گشت.
     return HttpResponse("پرداخت با شکست مواجه شده است. اگر پول کم شده است ظرف مدت ۴۸ ساعت پول به حساب شما بازخواهد گشت.")
 
